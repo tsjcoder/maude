@@ -6,7 +6,11 @@ import time
 
 # Get API key from environment variable with fallback to a default value
 # Set your ANTHROPIC_API_KEY environment variable instead of hardcoding it
-API_KEY = os.environ.get("ANTHROPIC_API_KEY", "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")
+API_KEY = os.environ.get("ANTHROPIC_API_KEY_MAUDE", "")
+
+# Check if API key is set
+if not API_KEY:
+    raise ValueError("Please set the ANTHROPIC_API_KEY_MAUDE environment variable")
 
 print(f">>> Using API key starting with: {API_KEY[:8] if len(API_KEY) > 8 else 'NOT_SET'}")
 
