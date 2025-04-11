@@ -4,15 +4,11 @@ import json
 import traceback
 import time
 
-# Get API key from environment variable with fallback to a default value
-# Set your ANTHROPIC_API_KEY environment variable instead of hardcoding it
+# Get API key from environment variable
+# Set your ANTHROPIC_API_KEY_MAUDE environment variable in your hosting platform
 API_KEY = os.environ.get("ANTHROPIC_API_KEY_MAUDE", "")
 
-# Check if API key is set
-if not API_KEY:
-    raise ValueError("Please set the ANTHROPIC_API_KEY_MAUDE environment variable")
-
-print(f">>> Using API key starting with: {API_KEY[:8] if len(API_KEY) > 8 else 'NOT_SET'}")
+print(">>> API configuration loaded")
 
 class MedicalAnalyzer:
     """
@@ -109,7 +105,7 @@ class MedicalAnalyzer:
         
         # Call the Anthropic API
         try:
-            print(f">>> Making API call to Anthropic with key: {API_KEY[:8]}...")
+            print(">>> Making API call to Anthropic...")
             
             # Add retries for API call robustness
             max_retries = 3
@@ -283,6 +279,6 @@ class MedicalAnalyzer:
             })
         
         # Add a development mode warning
-        mock_response["warnings"].append("Development mode active: Please set a valid Anthropic API key using the ANTHROPIC_API_KEY environment variable.")
+        mock_response["warnings"].append("Development mode active: No API key provided or using test mode.")
         
         return json.dumps(mock_response)
