@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect
+from flask import Flask, render_template, request, jsonify, session
 import os
 import json
 from werkzeug.utils import secure_filename
@@ -7,7 +7,7 @@ import secrets
 from app.file_processor import FileProcessor
 from app.analyzer import MedicalAnalyzer
 
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
+app = Flask(__name__, template_folder='templates', static_folder='static')
 app.secret_key = secrets.token_hex(16)
 app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload size
@@ -85,15 +85,14 @@ def results():
         # Check if there's an error in the result
         if 'error' in result and result['error']:
             return render_template('error.html', 
-                                 error=f"Analysis Error: {result['error']}", 
-                                 additional_info=result.get('disclaimer', ''))
+                               error=f"Analysis Error: {result['error']}", 
+                               additional_info=result.get('disclaimer', ''))
         
         return render_template('results.html', result=result)
     except json.JSONDecodeError as e:
         return render_template('error.html', 
-                             error='Invalid result format. The analysis produced malformed data.', 
-                             additional_info='Please try again with a different file.')
+                           error='Invalid result format. The analysis produced malformed data.', 
+                           additional_info='Please try again with a different file.')
 
-# This handler is needed for Vercel
-def handler(request, context):
-    return app(request, context)
+if __name__ == '__main__':
+    app.run()
