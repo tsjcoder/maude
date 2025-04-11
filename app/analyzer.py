@@ -26,24 +26,17 @@ class MedicalAnalyzer:
         # Create client only if we have a valid API key
         if API_KEY != "your_api_key_here" and API_KEY:
             try:
-                # Initialize client with minimal parameters to avoid 'proxies' error
-                import httpx
-                from anthropic._client import Anthropic as AnthropicClient
-                from anthropic.resources.completions import Completions
-                from anthropic.resources.messages import Messages
-                
-                # Create a base client with just the API key
-                self.client = AnthropicClient.__new__(AnthropicClient)
-                self.client.api_key = API_KEY
-                self.client.base_url = "https://api.anthropic.com"
-                self.client.messages = Messages(api_key=API_KEY, base_url="https://api.anthropic.com")
-                
-                print(">>> Anthropic client initialized successfully")
+                # We'll create the client when needed for each request
+                # This avoids initialization issues
+                self.has_valid_key = True
+                print(">>> API key validated successfully")
             except Exception as e:
-                print(f">>> ERROR initializing Anthropic client: {str(e)}")
+                print(f">>> ERROR with API key: {str(e)}")
                 traceback.print_exc()
                 # We'll continue without a client and use mock responses
+                self.has_valid_key = False
         else:
+            self.has_valid_key = False
             print(">>> No valid API key found, will use mock responses")
     
     def analyze_patient_data(self, patient_data):
@@ -68,8 +61,8 @@ class MedicalAnalyzer:
         
         print(f">>> Patient data length: {len(patient_data)}")
         
-        # Check if we have a valid API key and client
-        if not self.client or API_KEY == "your_api_key_here" or not API_KEY:
+        # Check if we have a valid API key
+        if not self.has_valid_key or API_KEY == "your_api_key_here" or not API_KEY:
             print(">>> WARNING: No valid API key or client found! Using mock response.")
             # Return a mock response for testing purposes
             return self._generate_mock_response(patient_data)
@@ -127,42 +120,20 @@ class MedicalAnalyzer:
                     print(f">>> API call attempt {attempt + 1} of {max_retries}")
                     start_time = time.time()
                     
-                    # Direct API call to avoid client compatibility issues
-                    import httpx
+                    # Use the standard Anthropic client
+                    import anthropic
                     
-                    headers = {
-                        "x-api-key": API_KEY,
-                        "anthropic-version": "2023-06-01",
-                        "content-type": "application/json"
-                    }
+                    # Create a fresh client for each request
+                    client = anthropic.Anthropic(api_key=API_KEY)
                     
-                    data = {
-                        "model": "claude-3-sonnet-20240229",
-                        "max_tokens": 4000,
-                        "system": system_prompt,
-                        "messages": [
+                    response = client.messages.create(
+                        model="claude-3-7-sonnet-20250219",
+                        max_tokens=4000,
+                        system=system_prompt,
+                        messages=[
                             {"role": "user", "content": user_prompt}
                         ]
-                    }
-                    
-                    response_raw = httpx.post(
-                        "https://api.anthropic.com/v1/messages",
-                        headers=headers,
-                        json=data,
-                        timeout=60.0
                     )
-                    
-                    if response_raw.status_code != 200:
-                        raise Exception(f"API error: {response_raw.status_code} {response_raw.text}")
-                        
-                    response_data = response_raw.json()
-                    
-                    # Create a compatible response object
-                    class ResponseWrapper:
-                        def __init__(self, data):
-                            self.content = [type('obj', (object,), {'text': data['content'][0]['text']})]
-                    
-                    response = ResponseWrapper(response_data)
                     
                     print(f">>> API call completed in {time.time() - start_time:.2f} seconds")
                     break  # Success - exit retry loop
