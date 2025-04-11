@@ -9,10 +9,10 @@ from app.analyzer import MedicalAnalyzer
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.secret_key = secrets.token_hex(16)
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload size
 
-# Create uploads directory if it doesn't exist
+# Create uploads directory in /tmp (works on serverless)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Allowed file extensions
