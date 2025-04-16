@@ -150,7 +150,8 @@ class MedicalAnalyzer:
             # Extract the content from the response
             try:
                 print(">>> Extracting content from response")
-                analysis = response.content[0].text
+                # Access Anthropic API response correctly
+                analysis = response.content[0].text if isinstance(response.content, list) else response.content
                 print(f">>> Content extracted, length: {len(analysis)}")
                 
                 # Try to clean up any potential issues with the JSON
