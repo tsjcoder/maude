@@ -123,7 +123,8 @@ class MedicalAnalyzer:
                     # Use the standard Anthropic client
                     import anthropic
                     
-                    # Create a fresh client for each request
+                    # Create a fresh client for each request without extra parameters
+                    # Using only the API key to avoid 'proxies' error
                     client = anthropic.Anthropic(api_key=API_KEY)
                     
                     response = client.messages.create(
