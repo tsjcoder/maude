@@ -18,7 +18,7 @@ class MedicalAnalyzer:
     
     def __init__(self):
         """
-        Initialize the MedicalAnalyzer with the predefined Anthropic API key.
+        Initialize the MedicalAnalyzer with the predefined Anthropic API key. 
         """
         print(">>> Initializing Anthropic client")
         self.client = None
